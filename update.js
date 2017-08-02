@@ -16,7 +16,7 @@ const getCensusData = (id, type, cb) => {
   console.log(q)
   request.get(curi)
     .type('json')
-    .retry(2)
+    .retry(1)
     .query({ q })
     .end((err, res) => {
       if (err) return cb(err.response ? err.response.text : err)

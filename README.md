@@ -7,7 +7,7 @@
 
 GeoJSON boundaries for Earth, masterfully formatted and normalized for your consumption.
 
-Total # as of writing this: **81,146**
+Total # as of writing this: **81,167**
 
 ## Sources
 
