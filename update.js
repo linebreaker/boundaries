@@ -5,16 +5,19 @@ import path from 'path'
 import async from 'async'
 import request from 'superagent'
 import camel from 'camelcase'
+import through from 'through2'
+import JSONStream from 'JSONStream'
+import isoc from 'isoc'
 
 const writePath = path.join(__dirname, './files')
+const countryUrl = 'https://github.com/busrapidohq/world-countries-boundaries/raw/master/geojson/1m/world.geo.json'
+const censusUrl = 'https://observatory.carto.com/api/v2/sql'
 
-const curi = 'https://observatory.carto.com/api/v2/sql'
 const getCensusData = (id, type, cb) => {
   const table = getBoundaryTable(type)
   if (!table) return cb()
   const q = `SELECT * FROM ${table} WHERE geoid = '${id}' LIMIT 1`
-  console.log(q)
-  request.get(curi)
+  request.get(censusUrl)
     .type('json')
     .retry(1)
     .query({ q })
@@ -119,10 +122,33 @@ const neighborhoods = (cb) => {
   })
 }
 
+const countries = (cb) => {
+  const writeCountry = (doc, enc, done) => {
+    const data = getPolygon(doc)
+    const id = doc.properties.ISO_A3
+    const full = isoc.find((c) => c.alpha3 === id)
+    data.properties = {
+      id,
+      type: 'country',
+      name: full.name.short
+    }
+    write(data, done)
+  }
+  request.get(countryUrl)
+    .type('json')
+    .retry(1)
+    .buffer(false)
+    .pipe(JSONStream.parse('features.*'))
+    .pipe(through.obj(writeCountry))
+    .once('error', cb)
+    .once('end', cb)
+}
+
 const done = (err) => {
   if (err) return console.error(err)
   console.log('Done importing!')
   process.exit(0)
 }
 
-async.parallel([ census, neighborhoods ], done)
+countries(done)
+// async.parallel([ census, neighborhoods ], done)

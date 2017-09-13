@@ -7,7 +7,7 @@
 
 GeoJSON boundaries for Earth, masterfully formatted and normalized for your consumption.
 
-Total # as of writing this: **81,167**
+Total # as of writing this: **81,417**
 
 ## Sources
 
@@ -15,6 +15,8 @@ Total # as of writing this: **81,167**
   - Zillow
 - US States/Cities/Counties/Zip Codes
   - Census Bureau (TIGER 2016)
+- Countries
+  - https://github.com/busrapidohq/world-countries-boundaries
 
 Know of more good sources for boundary data? Send a PR!
 
