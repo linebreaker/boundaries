@@ -10,7 +10,7 @@ import JSONStream from 'JSONStream'
 import isoc from 'isoc'
 
 const writePath = path.join(__dirname, './files')
-const countryUrl = 'https://github.com/busrapidohq/world-countries-boundaries/raw/master/geojson/1m/world.geo.json'
+const countryUrl = 'https://github.com/busrapidohq/world-countries-boundaries/raw/master/geojson/orig/world.geo.json'
 const censusUrl = 'https://observatory.carto.com/api/v2/sql'
 
 const getCensusData = (id, type, cb) => {
@@ -40,10 +40,11 @@ const getCensusData = (id, type, cb) => {
 }
 
 const getPolygon = (feature) => {
-  const isPolygon = feature.geometry.type === 'Polygon'
+  if (feature.geometry) feature = feature.geometry
+  const isPolygon = feature.type === 'Polygon'
   const coords = isPolygon ?
-    [ feature.geometry.coordinates ]
-    : feature.geometry.coordinates
+    [ feature.coordinates ]
+    : feature.coordinates
 
   return {
     type: 'MultiPolygon',
@@ -124,7 +125,7 @@ const neighborhoods = (cb) => {
 
 const countries = (cb) => {
   const writeCountry = (doc, enc, done) => {
-    const data = getPolygon(doc)
+    const data = getPolygon(doc.geometry.geometries[0])
     const id = doc.properties.ISO_A3
     const full = isoc.find((c) => c.alpha3 === id)
     data.properties = {
@@ -150,5 +151,4 @@ const done = (err) => {
   process.exit(0)
 }
 
-countries(done)
-// async.parallel([ census, neighborhoods ], done)
+async.parallel([ countries, census, neighborhoods ], done)
